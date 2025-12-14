@@ -1,0 +1,13 @@
+{
+  "model_architecture": {
+    "architecture": "MalwareGNN",
+    "input_dim": 12,
+    "hidden_dim": 64,
+    "num_layers": 3,
+    "dropout": 0.3,
+    "num_classes": 2,
+    "total_parameters": 28322,
+    "trainable_parameters": 28322
+  },
+  "training_config": {}
+}

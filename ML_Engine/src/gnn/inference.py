@@ -92,6 +92,10 @@ class GNNPredictor:
             # Make prediction
             result = self.model.predict(pyg_data)
 
+            # Convert numpy arrays to lists for JSON serialization
+            if 'embedding' in result:
+                result['embedding'] = result['embedding'].tolist()
+
             # Add graph metadata
             result['graph_metadata'] = metadata
 
@@ -99,7 +103,7 @@ class GNNPredictor:
             result['attack_pattern'] = self._identify_attack_pattern(metadata)
 
             # Risk score (0-100)
-            result['risk_score'] = result['prob_malicious'] * 100
+            result['risk_score'] = float(result['prob_malicious'] * 100)
 
             return result
 
