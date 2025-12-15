@@ -209,4 +209,90 @@ export const triggerAnalysis = async (
   }
 };
 
+// Trigger ML (GNN) analysis for a file
+export const triggerMLAnalysis = async (
+  fileId: string,
+  s3Key: string,
+  s3Bucket: string,
+  fileName?: string
+): Promise<any> => {
+  try {
+    const response = await api.post(`/ml/analyze/${fileId}`, {
+      s3Key,
+      s3Bucket,
+      fileName
+    });
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      throw {
+        message: error.response?.data?.message || 'Failed to trigger ML analysis',
+        status: error.response?.status || 500,
+        details: error.response?.data || {}
+      };
+    }
+    throw error;
+  }
+};
+
+// Trigger BERT analysis for a file
+export const triggerBERTAnalysis = async (
+  fileId: string,
+  s3Key: string,
+  s3Bucket: string,
+  fileName?: string
+): Promise<any> => {
+  try {
+    const response = await api.post(`/ml/bert/analyze/${fileId}`, {
+      s3Key,
+      s3Bucket,
+      fileName
+    });
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      throw {
+        message: error.response?.data?.message || 'Failed to trigger BERT analysis',
+        status: error.response?.status || 500,
+        details: error.response?.data || {}
+      };
+    }
+    throw error;
+  }
+};
+
+// Get ML models info
+export const getMLModelsInfo = async (): Promise<any> => {
+  try {
+    const response = await api.get('/ml/models/info');
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      throw {
+        message: error.response?.data?.message || 'Failed to fetch ML models info',
+        status: error.response?.status || 500,
+        details: error.response?.data || {}
+      };
+    }
+    throw error;
+  }
+};
+
+// Check ML API health
+export const mlHealthCheck = async (): Promise<any> => {
+  try {
+    const response = await api.get('/ml/health');
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      throw {
+        message: error.response?.data?.message || 'ML health check failed',
+        status: error.response?.status || 500,
+        details: error.response?.data || {}
+      };
+    }
+    throw error;
+  }
+};
+
 export default api;

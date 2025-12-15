@@ -1,0 +1,29 @@
+{
+  "model_architecture": {
+    "architecture": "MalwareBERT",
+    "pretrained_model": "distilbert-base-uncased",
+    "max_length": 512,
+    "dropout": 0.5,
+    "num_classes": 2,
+    "trainable_parameters": 66560258,
+    "total_parameters": 66560258,
+    "frozen_parameters": 0
+  },
+  "training_config": {
+    "pretrained_model": "distilbert-base-uncased",
+    "max_length": 512,
+    "batch_size": 4,
+    "epochs": 20,
+    "learning_rate": 1e-05,
+    "dropout": 0.5,
+    "freeze_bert": false,
+    "warmup_steps": 50,
+    "augmentation_factor": 3,
+    "weight_decay": 0.01
+  },
+  "best_metrics": {
+    "val_loss": 0.12564771870772043,
+    "val_accuracy": 1.0,
+    "train_accuracy": 0.8765432098765432
+  }
+}

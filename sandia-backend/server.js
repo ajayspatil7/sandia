@@ -9,6 +9,7 @@ import uploadRoutes from './routes/upload.js';
 import healthRoutes from './routes/health.js';
 import analysisRoutes from './routes/analysis.js';
 import filesRoutes from './routes/files.js';
+import mlRoutes from './routes/ml.js';
 
 // Load environment variables
 dotenv.config();
@@ -76,6 +77,7 @@ app.use('/api/health', healthRoutes);
 app.use('/api/upload', uploadLimiter, uploadRoutes);
 app.use('/api/files', filesRoutes); // File listing endpoints (no rate limiter)
 app.use('/api/analysis', analysisRoutes);
+app.use('/api/ml', mlRoutes); // ML analysis endpoints
 
 // Root endpoint
 app.get('/', (req, res) => {
@@ -90,7 +92,10 @@ app.get('/', (req, res) => {
       upload_status: 'GET /api/upload/status/:jobId',
       trigger_analysis: 'POST /api/analysis/trigger/:fileId',
       analysis_results: 'GET /api/analysis/results/:fileId',
-      analysis_status: 'GET /api/analysis/status/:fileId'
+      analysis_status: 'GET /api/analysis/status/:fileId',
+      ml_analyze: 'POST /api/ml/analyze/:fileId',
+      ml_models_info: 'GET /api/ml/models/info',
+      ml_health: 'GET /api/ml/health'
     },
     timestamp: new Date().toISOString()
   });
@@ -110,7 +115,10 @@ app.use('*', (req, res) => {
       'GET /api/upload/status/:jobId',
       'POST /api/analysis/trigger/:fileId',
       'GET /api/analysis/results/:fileId',
-      'GET /api/analysis/status/:fileId'
+      'GET /api/analysis/status/:fileId',
+      'POST /api/ml/analyze/:fileId',
+      'GET /api/ml/models/info',
+      'GET /api/ml/health'
     ]
   });
 });

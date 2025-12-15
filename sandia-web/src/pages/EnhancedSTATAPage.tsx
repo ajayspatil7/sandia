@@ -36,7 +36,7 @@ import {
   ExternalLink
 } from 'lucide-react'
 import { StaticAnalysisResult } from '../types/analysis'
-import { getAnalysisResults, triggerAnalysis } from '../services/api'
+import { getAnalysisResults, triggerAnalysis, triggerMLAnalysis, triggerBERTAnalysis } from '../services/api'
 
 interface UploadedFile {
   id: string
@@ -58,6 +58,12 @@ export default function EnhancedSTATAPage() {
   const [analysisTriggered, setAnalysisTriggered] = useState(false)
   const [pollingAttempts, setPollingAttempts] = useState(0)
   const [expandedItems, setExpandedItems] = useState<Set<number>>(new Set([0]))
+  const [mlAnalysis, setMLAnalysis] = useState<any | null>(null)
+  const [mlLoading, setMLLoading] = useState(false)
+  const [mlError, setMLError] = useState<string | null>(null)
+  const [bertAnalysis, setBertAnalysis] = useState<any | null>(null)
+  const [bertLoading, setBertLoading] = useState(false)
+  const [bertError, setBertError] = useState<string | null>(null)
 
   const toggleExpanded = (index: number) => {
     setExpandedItems(prev => {
@@ -178,7 +184,8 @@ export default function EnhancedSTATAPage() {
     { id: 'commands', name: 'Commands', icon: Terminal },
     { id: 'hashes', name: 'Hashes & Strings', icon: Hash },
     { id: 'code', name: 'Code Analysis', icon: Code },
-    { id: 'mitre', name: 'MITRE ATT&CK', icon: Target }
+    { id: 'mitre', name: 'MITRE ATT&CK', icon: Target },
+    { id: 'ml', name: 'ML Analysis', icon: Cpu }
   ]
 
   const analysis = selectedFile?.analysisResult
@@ -1330,6 +1337,758 @@ export default function EnhancedSTATAPage() {
     )
   }
 
+  const renderML = () => {
+    const handleMLAnalysis = async () => {
+      if (!selectedFile) return
+
+      setMLLoading(true)
+      setMLError(null)
+
+      try {
+        const fileId = searchParams.get('fileId')
+        const s3Key = searchParams.get('s3Key')
+        const s3Bucket = searchParams.get('s3Bucket')
+        const fileName = searchParams.get('fileName')
+
+        if (!fileId || !s3Key || !s3Bucket) {
+          throw new Error('Missing file information')
+        }
+
+        console.log('[ML] Triggering GNN analysis...')
+        const result = await triggerMLAnalysis(fileId, s3Key, s3Bucket, fileName || undefined)
+
+        if (result.success && result.data) {
+          setMLAnalysis(result.data.analysis)
+          console.log('[ML] GNN analysis completed:', result.data.analysis)
+        } else {
+          throw new Error(result.message || 'ML analysis failed')
+        }
+      } catch (err: any) {
+        console.error('[ML] Analysis failed:', err)
+        setMLError(err.message || 'Failed to run ML analysis')
+      } finally {
+        setMLLoading(false)
+      }
+    }
+
+    const handleBERTAnalysis = async () => {
+      if (!selectedFile) return
+
+      setBertLoading(true)
+      setBertError(null)
+
+      try {
+        const fileId = searchParams.get('fileId')
+        const s3Key = searchParams.get('s3Key')
+        const s3Bucket = searchParams.get('s3Bucket')
+        const fileName = searchParams.get('fileName')
+
+        if (!fileId || !s3Key || !s3Bucket) {
+          throw new Error('Missing file information')
+        }
+
+        console.log('[BERT] Triggering semantic analysis...')
+        const result = await triggerBERTAnalysis(fileId, s3Key, s3Bucket, fileName || undefined)
+
+        if (result.success && result.data) {
+          setBertAnalysis(result.data.analysis)
+          console.log('[BERT] Analysis completed:', result.data.analysis)
+        } else {
+          throw new Error(result.message || 'BERT analysis failed')
+        }
+      } catch (err: any) {
+        console.error('[BERT] Analysis failed:', err)
+        setBertError(err.message || 'Failed to run BERT analysis')
+      } finally {
+        setBertLoading(false)
+      }
+    }
+
+    return (
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-cyan-500/10 to-purple-500/10 border border-cyan-500/20 rounded-xl p-6">
+          <div className="flex items-center gap-3 mb-3">
+            <Brain className="w-8 h-8 text-cyan-400" />
+            <div>
+              <h2 className="text-white text-2xl font-bold">Machine Learning Analysis</h2>
+              <p className="text-slate-400">Multi-Model AI-Powered Malware Detection</p>
+            </div>
+          </div>
+          <p className="text-slate-300 text-sm">
+            Analyze scripts using two complementary ML approaches: GNN for control flow structure analysis and BERT for semantic understanding.
+          </p>
+        </div>
+
+        {/* Analysis Trigger Buttons */}
+        {(!mlAnalysis && !mlLoading) || (!bertAnalysis && !bertLoading) ? (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-8"
+          >
+            <div className="flex items-center justify-center gap-3 mb-6">
+              <Brain className="w-12 h-12 text-purple-400" />
+              <div className="text-center">
+                <h3 className="text-white text-xl font-semibold">Ready for ML Analysis</h3>
+                <p className="text-slate-400 text-sm">Choose an analysis method below</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* GNN Analysis Button */}
+              {!mlAnalysis && !mlLoading && (
+                <button
+                  onClick={handleMLAnalysis}
+                  className="group relative overflow-hidden px-8 py-6 bg-gradient-to-br from-cyan-500/20 to-blue-500/20 hover:from-cyan-500/30 hover:to-blue-500/30 border border-cyan-500/30 text-white font-semibold rounded-xl transition-all shadow-lg hover:shadow-cyan-500/20"
+                >
+                  <div className="flex flex-col items-center gap-3">
+                    <Cpu className="w-8 h-8 text-cyan-400" />
+                    <div>
+                      <p className="text-lg font-bold text-cyan-300">GNN Analysis</p>
+                      <p className="text-xs text-slate-400 mt-1">Control Flow Structure</p>
+                    </div>
+                  </div>
+                </button>
+              )}
+
+              {/* BERT Analysis Button */}
+              {!bertAnalysis && !bertLoading && (
+                <button
+                  onClick={handleBERTAnalysis}
+                  className="group relative overflow-hidden px-8 py-6 bg-gradient-to-br from-purple-500/20 to-pink-500/20 hover:from-purple-500/30 hover:to-pink-500/30 border border-purple-500/30 text-white font-semibold rounded-xl transition-all shadow-lg hover:shadow-purple-500/20"
+                >
+                  <div className="flex flex-col items-center gap-3">
+                    <FileText className="w-8 h-8 text-purple-400" />
+                    <div>
+                      <p className="text-lg font-bold text-purple-300">BERT Analysis</p>
+                      <p className="text-xs text-slate-400 mt-1">Semantic Understanding</p>
+                    </div>
+                  </div>
+                </button>
+              )}
+            </div>
+
+            {(mlAnalysis || bertAnalysis) && (
+              <p className="text-center text-slate-400 text-sm mt-4">
+                Run both analyses for comprehensive threat assessment
+              </p>
+            )}
+          </motion.div>
+        ) : null}
+
+        {/* GNN Loading State */}
+        {mlLoading && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="bg-slate-800/50 border border-cyan-500/30 rounded-xl p-12 text-center"
+          >
+            <div className="w-16 h-16 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <h3 className="text-white text-xl font-semibold mb-2">Analyzing with GNN...</h3>
+            <p className="text-slate-400">Building control flow graph and running inference</p>
+          </motion.div>
+        )}
+
+        {/* BERT Loading State */}
+        {bertLoading && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="bg-slate-800/50 border border-purple-500/30 rounded-xl p-12 text-center"
+          >
+            <div className="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <h3 className="text-white text-xl font-semibold mb-2">Analyzing with BERT...</h3>
+            <p className="text-slate-400">Processing semantic features and running inference</p>
+          </motion.div>
+        )}
+
+        {/* GNN Error State */}
+        {mlError && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-red-500/10 border border-red-500/30 rounded-xl p-6"
+          >
+            <div className="flex items-start gap-3">
+              <AlertCircle className="w-6 h-6 text-red-400 flex-shrink-0 mt-0.5" />
+              <div>
+                <h3 className="text-red-400 font-semibold mb-1">GNN Analysis Failed</h3>
+                <p className="text-slate-300 text-sm">{mlError}</p>
+                <button
+                  onClick={handleMLAnalysis}
+                  className="mt-3 px-4 py-2 bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 text-red-300 rounded-lg transition-colors text-sm"
+                >
+                  Retry GNN Analysis
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {/* BERT Error State */}
+        {bertError && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-red-500/10 border border-red-500/30 rounded-xl p-6"
+          >
+            <div className="flex items-start gap-3">
+              <AlertCircle className="w-6 h-6 text-red-400 flex-shrink-0 mt-0.5" />
+              <div>
+                <h3 className="text-red-400 font-semibold mb-1">BERT Analysis Failed</h3>
+                <p className="text-slate-300 text-sm">{bertError}</p>
+                <button
+                  onClick={handleBERTAnalysis}
+                  className="mt-3 px-4 py-2 bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 text-red-300 rounded-lg transition-colors text-sm"
+                >
+                  Retry BERT Analysis
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {/* GNN Results */}
+        {mlAnalysis && (
+          <div className="space-y-6">
+            {/* Verdict & Risk Score */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className={cn(
+                "border rounded-xl p-6",
+                mlAnalysis.is_malicious
+                  ? "bg-red-500/10 border-red-500/30"
+                  : "bg-green-500/10 border-green-500/30"
+              )}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  {mlAnalysis.is_malicious ? (
+                    <XCircle className="w-8 h-8 text-red-500" />
+                  ) : (
+                    <CheckCircle className="w-8 h-8 text-green-500" />
+                  )}
+                  <div>
+                    <h3 className={cn(
+                      "text-2xl font-bold",
+                      mlAnalysis.is_malicious ? "text-red-400" : "text-green-400"
+                    )}>
+                      {mlAnalysis.is_malicious ? 'MALICIOUS' : 'BENIGN'}
+                    </h3>
+                    <p className="text-slate-400 text-sm">GNN Model Prediction</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="text-3xl font-bold text-white">{mlAnalysis.risk_score.toFixed(1)}%</p>
+                  <p className="text-slate-400 text-sm">Risk Score</p>
+                </div>
+              </div>
+
+              {/* Confidence */}
+              <div className="mb-4">
+                <div className="flex items-center justify-between text-sm mb-2">
+                  <span className="text-slate-400">Confidence</span>
+                  <span className="text-white font-semibold">{(mlAnalysis.confidence * 100).toFixed(2)}%</span>
+                </div>
+                <div className="h-2 bg-slate-900/50 rounded-full overflow-hidden">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${mlAnalysis.confidence * 100}%` }}
+                    transition={{ duration: 1, ease: "easeOut" }}
+                    className="h-full bg-gradient-to-r from-cyan-500 to-purple-500 rounded-full"
+                  />
+                </div>
+              </div>
+
+              {/* Attack Pattern */}
+              {mlAnalysis.attack_pattern && (
+                <div className="bg-slate-900/50 rounded-lg p-4 border border-slate-700/30">
+                  <p className="text-slate-400 text-sm mb-1">Detected Attack Pattern</p>
+                  <p className="text-white font-semibold capitalize">{mlAnalysis.attack_pattern.replace(/-/g, ' ')}</p>
+                </div>
+              )}
+            </motion.div>
+
+            {/* Graph Metadata */}
+            {mlAnalysis.graph_metadata && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+                className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-6"
+              >
+                <h3 className="text-white font-semibold mb-4 flex items-center gap-2">
+                  <Network className="w-5 h-5" />
+                  Control Flow Graph Analysis
+                </h3>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <MetricCard label="Graph Nodes" value={mlAnalysis.graph_metadata.num_nodes} />
+                  <MetricCard label="Graph Edges" value={mlAnalysis.graph_metadata.num_edges} />
+                  <MetricCard label="Commands" value={mlAnalysis.graph_metadata.num_commands} />
+                  <MetricCard label="Avg Risk" value={mlAnalysis.graph_metadata.avg_risk?.toFixed(2) || 'N/A'} />
+                </div>
+
+                {/* Command Categories */}
+                {mlAnalysis.graph_metadata.command_categories && (
+                  <div className="mt-6">
+                    <p className="text-slate-400 text-sm mb-3">Command Categories Detected</p>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                      {Object.entries(mlAnalysis.graph_metadata.command_categories).map(([category, count]: [string, any]) => (
+                        count > 0 && (
+                          <div
+                            key={category}
+                            className="bg-cyan-500/10 border border-cyan-500/20 rounded-lg p-3"
+                          >
+                            <p className="text-cyan-300 text-sm font-medium capitalize">{category.replace(/_/g, ' ')}</p>
+                            <p className="text-white text-lg font-bold">{count}</p>
+                          </div>
+                        )
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </motion.div>
+            )}
+
+            {/* Comparison with STATA */}
+            {analysis && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-6"
+              >
+                <h3 className="text-white font-semibold mb-4 flex items-center gap-2">
+                  <Activity className="w-5 h-5" />
+                  GNN vs Rule-Based Comparison
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* GNN Results */}
+                  <div className="bg-purple-500/10 border border-purple-500/20 rounded-lg p-4">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Cpu className="w-5 h-5 text-purple-400" />
+                      <h4 className="text-purple-300 font-semibold">GNN Model</h4>
+                    </div>
+                    <div className="space-y-2">
+                      <div>
+                        <p className="text-slate-400 text-xs">Verdict</p>
+                        <p className={cn(
+                          "font-semibold",
+                          mlAnalysis.is_malicious ? "text-red-400" : "text-green-400"
+                        )}>
+                          {mlAnalysis.is_malicious ? 'MALICIOUS' : 'BENIGN'}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-slate-400 text-xs">Risk Score</p>
+                        <p className="text-white font-semibold">{mlAnalysis.risk_score.toFixed(1)}%</p>
+                      </div>
+                      <div>
+                        <p className="text-slate-400 text-xs">Confidence</p>
+                        <p className="text-white font-semibold">{(mlAnalysis.confidence * 100).toFixed(1)}%</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* STATA Results */}
+                  <div className="bg-cyan-500/10 border border-cyan-500/20 rounded-lg p-4">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Terminal className="w-5 h-5 text-cyan-400" />
+                      <h4 className="text-cyan-300 font-semibold">Rule-Based (STATA)</h4>
+                    </div>
+                    <div className="space-y-2">
+                      <div>
+                        <p className="text-slate-400 text-xs">Verdict</p>
+                        <p className={cn(
+                          "font-semibold",
+                          analysis.risk_assessment?.verdict?.toUpperCase() === 'MALICIOUS' ? "text-red-400" : "text-green-400"
+                        )}>
+                          {analysis.risk_assessment?.verdict?.toUpperCase() || 'UNKNOWN'}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-slate-400 text-xs">Risk Score</p>
+                        <p className="text-white font-semibold">{analysis.risk_assessment?.risk_score_percentage || 0}%</p>
+                      </div>
+                      <div>
+                        <p className="text-slate-400 text-xs">Threat Indicators</p>
+                        <p className="text-white font-semibold">{analysis.threat_indicators?.length || 0}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Agreement Analysis */}
+                <div className="mt-4 p-4 bg-slate-900/50 rounded-lg border border-slate-700/30">
+                  {(() => {
+                    const gnnMalicious = mlAnalysis.is_malicious
+                    const stataMalicious = analysis.risk_assessment?.verdict?.toUpperCase() === 'MALICIOUS'
+                    const agreement = gnnMalicious === stataMalicious
+
+                    return (
+                      <div className="flex items-start gap-3">
+                        {agreement ? (
+                          <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
+                        ) : (
+                          <AlertTriangle className="w-5 h-5 text-yellow-400 flex-shrink-0 mt-0.5" />
+                        )}
+                        <div>
+                          <p className={cn(
+                            "font-semibold mb-1",
+                            agreement ? "text-green-400" : "text-yellow-400"
+                          )}>
+                            {agreement ? 'Models Agree' : 'Models Disagree'}
+                          </p>
+                          <p className="text-slate-300 text-sm">
+                            {agreement
+                              ? 'Both GNN and rule-based analysis reached the same conclusion, increasing confidence in the verdict.'
+                              : 'The GNN model and rule-based analysis have different verdicts. The GNN considers code structure and control flow, while STATA uses pattern matching. Consider both analyses for a comprehensive assessment.'}
+                          </p>
+                        </div>
+                      </div>
+                    )
+                  })()}
+                </div>
+              </motion.div>
+            )}
+
+            {/* Re-analyze Button */}
+            <div className="text-center">
+              <button
+                onClick={handleMLAnalysis}
+                className="px-6 py-2 bg-slate-700 hover:bg-slate-600 border border-slate-600 text-slate-300 rounded-lg transition-colors"
+              >
+                Re-run Analysis
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* BERT Results */}
+        {bertAnalysis && (
+          <div className="space-y-6">
+            {/* Verdict & Risk Score */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className={cn(
+                "border rounded-xl p-6",
+                bertAnalysis.is_malicious
+                  ? "bg-red-500/10 border-red-500/30"
+                  : "bg-green-500/10 border-green-500/30"
+              )}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  {bertAnalysis.is_malicious ? (
+                    <XCircle className="w-8 h-8 text-red-500" />
+                  ) : (
+                    <CheckCircle className="w-8 h-8 text-green-500" />
+                  )}
+                  <div>
+                    <h3 className={cn(
+                      "text-2xl font-bold",
+                      bertAnalysis.is_malicious ? "text-red-400" : "text-green-400"
+                    )}>
+                      {bertAnalysis.is_malicious ? 'MALICIOUS' : 'BENIGN'}
+                    </h3>
+                    <p className="text-slate-400 text-sm">BERT Model Prediction</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="text-3xl font-bold text-white">{bertAnalysis.risk_score?.toFixed(1) || 0}%</p>
+                  <p className="text-slate-400 text-sm">Risk Score</p>
+                </div>
+              </div>
+
+              {/* Confidence */}
+              <div className="mb-4">
+                <div className="flex items-center justify-between text-sm mb-2">
+                  <span className="text-slate-400">Confidence</span>
+                  <span className="text-white font-semibold">{((bertAnalysis.confidence || 0) * 100).toFixed(2)}%</span>
+                </div>
+                <div className="h-2 bg-slate-900/50 rounded-full overflow-hidden">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${(bertAnalysis.confidence || 0) * 100}%` }}
+                    transition={{ duration: 1, ease: "easeOut" }}
+                    className="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full"
+                  />
+                </div>
+              </div>
+
+              {/* Threat Category */}
+              {bertAnalysis.threat_category && (
+                <div className="bg-slate-900/50 rounded-lg p-4 border border-slate-700/30">
+                  <p className="text-slate-400 text-sm mb-1">Threat Category</p>
+                  <p className="text-white font-semibold capitalize">{bertAnalysis.threat_category.replace(/-/g, ' ')}</p>
+                </div>
+              )}
+            </motion.div>
+
+            {/* Semantic Features */}
+            {bertAnalysis.semantic_features && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+                className="bg-slate-800/50 border border-purple-500/30 rounded-xl p-6"
+              >
+                <h3 className="text-white font-semibold mb-4 flex items-center gap-2">
+                  <FileText className="w-5 h-5 text-purple-400" />
+                  Semantic Features Analysis
+                </h3>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <MetricCard label="Total Commands" value={bertAnalysis.semantic_features.total_commands || 0} />
+                  <MetricCard label="Dangerous Commands" value={bertAnalysis.semantic_features.dangerous_commands?.length || 0} />
+                  <MetricCard label="URLs Found" value={bertAnalysis.semantic_features.urls?.length || 0} />
+                  <MetricCard label="IPs Found" value={bertAnalysis.semantic_features.ips?.length || 0} />
+                </div>
+
+                {/* Additional Feature Details */}
+                <div className="mt-4 grid grid-cols-2 md:grid-cols-3 gap-3">
+                  <div className="bg-slate-900/50 rounded-lg p-3 border border-slate-700/30">
+                    <p className="text-slate-400 text-xs mb-1">Base64 Encoded</p>
+                    <p className={cn(
+                      "font-semibold",
+                      bertAnalysis.semantic_features.has_base64 ? "text-yellow-400" : "text-green-400"
+                    )}>
+                      {bertAnalysis.semantic_features.has_base64 ? `Yes (${bertAnalysis.semantic_features.base64_count || 0})` : 'No'}
+                    </p>
+                  </div>
+                  <div className="bg-slate-900/50 rounded-lg p-3 border border-slate-700/30">
+                    <p className="text-slate-400 text-xs mb-1">Obfuscation Score</p>
+                    <p className={cn(
+                      "font-semibold",
+                      (bertAnalysis.semantic_features.obfuscation_score || 0) > 0.5 ? "text-red-400" : "text-green-400"
+                    )}>
+                      {((bertAnalysis.semantic_features.obfuscation_score || 0) * 100).toFixed(1)}%
+                    </p>
+                  </div>
+                  <div className="bg-slate-900/50 rounded-lg p-3 border border-slate-700/30">
+                    <p className="text-slate-400 text-xs mb-1">Dangerous Ratio</p>
+                    <p className={cn(
+                      "font-semibold",
+                      (bertAnalysis.semantic_features.dangerous_ratio || 0) > 0.3 ? "text-red-400" : "text-green-400"
+                    )}>
+                      {((bertAnalysis.semantic_features.dangerous_ratio || 0) * 100).toFixed(1)}%
+                    </p>
+                  </div>
+                </div>
+
+                {/* Dangerous Commands List */}
+                {bertAnalysis.semantic_features.dangerous_commands?.length > 0 && (
+                  <div className="mt-4">
+                    <p className="text-slate-400 text-sm mb-2">Dangerous Commands Detected</p>
+                    <div className="flex flex-wrap gap-2">
+                      {bertAnalysis.semantic_features.dangerous_commands.slice(0, 10).map((cmd: string, idx: number) => (
+                        <span key={idx} className="px-2 py-1 bg-red-500/20 border border-red-500/30 text-red-300 rounded text-sm font-mono">
+                          {cmd}
+                        </span>
+                      ))}
+                      {bertAnalysis.semantic_features.dangerous_commands.length > 10 && (
+                        <span className="px-2 py-1 bg-slate-700 text-slate-400 rounded text-sm">
+                          +{bertAnalysis.semantic_features.dangerous_commands.length - 10} more
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Suspicious Patterns */}
+                {bertAnalysis.semantic_features.suspicious_patterns?.length > 0 && (
+                  <div className="mt-4">
+                    <p className="text-slate-400 text-sm mb-2">Suspicious Patterns</p>
+                    <div className="flex flex-wrap gap-2">
+                      {bertAnalysis.semantic_features.suspicious_patterns.slice(0, 8).map((pattern: string, idx: number) => (
+                        <span key={idx} className="px-2 py-1 bg-yellow-500/20 border border-yellow-500/30 text-yellow-300 rounded text-sm font-mono">
+                          {pattern}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </motion.div>
+            )}
+
+            {/* Threat Indicators */}
+            {bertAnalysis.threat_indicators?.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-6"
+              >
+                <h3 className="text-white font-semibold mb-4 flex items-center gap-2">
+                  <AlertTriangle className="w-5 h-5 text-orange-400" />
+                  Threat Indicators ({bertAnalysis.threat_indicators.length})
+                </h3>
+                <div className="space-y-3">
+                  {bertAnalysis.threat_indicators.map((threat: any, idx: number) => (
+                    <motion.div
+                      key={idx}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: idx * 0.05 }}
+                      className={cn(
+                        "p-4 rounded-lg border",
+                        threat.severity === 'critical' ? "bg-red-500/10 border-red-500/30" :
+                        threat.severity === 'high' ? "bg-orange-500/10 border-orange-500/30" :
+                        threat.severity === 'medium' ? "bg-yellow-500/10 border-yellow-500/30" :
+                        "bg-blue-500/10 border-blue-500/30"
+                      )}
+                    >
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className={cn(
+                              "px-2 py-0.5 rounded text-xs font-semibold uppercase",
+                              threat.severity === 'critical' ? "bg-red-500/20 text-red-400" :
+                              threat.severity === 'high' ? "bg-orange-500/20 text-orange-400" :
+                              threat.severity === 'medium' ? "bg-yellow-500/20 text-yellow-400" :
+                              "bg-blue-500/20 text-blue-400"
+                            )}>
+                              {threat.severity}
+                            </span>
+                            <span className="text-white font-semibold">{threat.type}</span>
+                          </div>
+                          <p className="text-slate-300 text-sm">{threat.description}</p>
+                          {threat.samples?.length > 0 && (
+                            <div className="mt-2 flex flex-wrap gap-1">
+                              {threat.samples.slice(0, 3).map((sample: string, sIdx: number) => (
+                                <span key={sIdx} className="px-2 py-0.5 bg-slate-900/50 text-slate-400 rounded text-xs font-mono truncate max-w-xs">
+                                  {sample}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+
+            {/* BERT vs STATA Comparison */}
+            {analysis && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-6"
+              >
+                <h3 className="text-white font-semibold mb-4 flex items-center gap-2">
+                  <Activity className="w-5 h-5" />
+                  BERT vs Rule-Based Comparison
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* BERT Results */}
+                  <div className="bg-purple-500/10 border border-purple-500/20 rounded-lg p-4">
+                    <div className="flex items-center gap-2 mb-3">
+                      <FileText className="w-5 h-5 text-purple-400" />
+                      <h4 className="text-purple-300 font-semibold">BERT Model</h4>
+                    </div>
+                    <div className="space-y-2">
+                      <div>
+                        <p className="text-slate-400 text-xs">Verdict</p>
+                        <p className={cn(
+                          "font-semibold",
+                          bertAnalysis.is_malicious ? "text-red-400" : "text-green-400"
+                        )}>
+                          {bertAnalysis.is_malicious ? 'MALICIOUS' : 'BENIGN'}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-slate-400 text-xs">Risk Score</p>
+                        <p className="text-white font-semibold">{bertAnalysis.risk_score?.toFixed(1) || 0}%</p>
+                      </div>
+                      <div>
+                        <p className="text-slate-400 text-xs">Threat Category</p>
+                        <p className="text-white font-semibold capitalize">{bertAnalysis.threat_category?.replace(/-/g, ' ') || 'N/A'}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* STATA Results */}
+                  <div className="bg-cyan-500/10 border border-cyan-500/20 rounded-lg p-4">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Terminal className="w-5 h-5 text-cyan-400" />
+                      <h4 className="text-cyan-300 font-semibold">Rule-Based (STATA)</h4>
+                    </div>
+                    <div className="space-y-2">
+                      <div>
+                        <p className="text-slate-400 text-xs">Verdict</p>
+                        <p className={cn(
+                          "font-semibold",
+                          analysis.risk_assessment?.verdict?.toUpperCase() === 'MALICIOUS' ? "text-red-400" : "text-green-400"
+                        )}>
+                          {analysis.risk_assessment?.verdict?.toUpperCase() || 'UNKNOWN'}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-slate-400 text-xs">Risk Score</p>
+                        <p className="text-white font-semibold">{analysis.risk_assessment?.risk_score_percentage || 0}%</p>
+                      </div>
+                      <div>
+                        <p className="text-slate-400 text-xs">Threat Indicators</p>
+                        <p className="text-white font-semibold">{analysis.threat_indicators?.length || 0}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Agreement Analysis */}
+                <div className="mt-4 p-4 bg-slate-900/50 rounded-lg border border-slate-700/30">
+                  {(() => {
+                    const bertMalicious = bertAnalysis.is_malicious
+                    const stataMalicious = analysis.risk_assessment?.verdict?.toUpperCase() === 'MALICIOUS'
+                    const agreement = bertMalicious === stataMalicious
+
+                    return (
+                      <div className="flex items-start gap-3">
+                        {agreement ? (
+                          <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
+                        ) : (
+                          <AlertTriangle className="w-5 h-5 text-yellow-400 flex-shrink-0 mt-0.5" />
+                        )}
+                        <div>
+                          <p className={cn(
+                            "font-semibold mb-1",
+                            agreement ? "text-green-400" : "text-yellow-400"
+                          )}>
+                            {agreement ? 'Models Agree' : 'Models Disagree'}
+                          </p>
+                          <p className="text-slate-300 text-sm">
+                            {agreement
+                              ? 'Both BERT and rule-based analysis reached the same conclusion, increasing confidence in the verdict.'
+                              : 'The BERT model and rule-based analysis have different verdicts. BERT understands semantic context, while STATA uses pattern matching. Consider both for a comprehensive assessment.'}
+                          </p>
+                        </div>
+                      </div>
+                    )
+                  })()}
+                </div>
+              </motion.div>
+            )}
+
+            {/* Re-analyze Button */}
+            <div className="text-center">
+              <button
+                onClick={handleBERTAnalysis}
+                className="px-6 py-2 bg-purple-700 hover:bg-purple-600 border border-purple-600 text-purple-200 rounded-lg transition-colors"
+              >
+                Re-run BERT Analysis
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    )
+  }
+
   // Loading state
   if (loading) {
     return (
@@ -1441,6 +2200,7 @@ export default function EnhancedSTATAPage() {
                 {activeSection === 'hashes' && renderHashes()}
                 {activeSection === 'code' && renderCodeAnalysis()}
                 {activeSection === 'mitre' && renderMitre()}
+                {activeSection === 'ml' && renderML()}
               </motion.div>
             </AnimatePresence>
           </main>

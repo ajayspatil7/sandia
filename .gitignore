@@ -195,6 +195,23 @@ samples/
 *.malware
 test-samples/
 
+# ====================
+# Machine Learning Models
+# ====================
+# Trained model files (too large for GitHub)
+ML_Engine/models/**/*.pth
+ML_Engine/models/**/*.pt
+ML_Engine/models/**/*.bin
+ML_Engine/models/**/*.h5
+ML_Engine/models/**/*.ckpt
+ML_Engine/models/**/*.pkl
+ML_Engine/models/**/*.joblib
+
+# Keep only config and metrics
+!ML_Engine/models/**/*.json
+!ML_Engine/models/**/*.txt
+!ML_Engine/models/**/README.md
+
 # Logs
 logs/
 *.log
